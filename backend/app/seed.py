@@ -35,18 +35,50 @@ def seed():
         db.flush()
 
         users = [
-            User(username="admin", password_hash=hash_password("admin1234"), full_name="System Admin", role="admin"),
-            User(username="staff01", password_hash=hash_password("staff1234"), full_name="Nida Sombat",
-                 role="store_staff", branch_code="CEN-001"),
-            User(username="dsm01", password_hash=hash_password("dsm1234"), full_name="Wirat Chaichana", role="dsm"),
-            User(username="vendor01", password_hash=hash_password("vendor1234"), full_name="Prime Repair",
-                 role="vendor", vendor_id=vendor.id),
+            User(
+                username="admin",
+                password_hash=hash_password("admin1234"),
+                full_name="System Admin",
+                role="admin",
+            ),
+            User(
+                username="pc01",
+                password_hash=hash_password("pc1234"),
+                full_name="Nida Sombat",
+                role="pc",
+                branch_code="CEN-001",
+            ),
+            User(
+                username="bdc01",
+                password_hash=hash_password("bdc1234"),
+                full_name="Manee BDC",
+                role="bdc",
+            ),
+            User(
+                username="gr01",
+                password_hash=hash_password("gr1234"),
+                full_name="Somchai GR",
+                role="gr",
+            ),
+            User(
+                username="dsm01",
+                password_hash=hash_password("dsm1234"),
+                full_name="Wirat Chaichana",
+                role="dsm",
+            ),
         ]
         for u in users:
             db.add(u)
 
         db.commit()
-        print("Seeded: 3 branches, 1 vendor, 4 users (admin/admin1234, staff01/staff1234, dsm01/dsm1234, vendor01/vendor1234)")
+        print(
+            "Seeded: 3 branches, 1 vendor, 5 users\n"
+            "  admin / admin1234   (Admin)\n"
+            "  pc01  / pc1234      (Product Consultant — CEN-001)\n"
+            "  bdc01 / bdc1234     (BDC Staff)\n"
+            "  gr01  / gr1234      (GR Staff)\n"
+            "  dsm01 / dsm1234     (DSM)"
+        )
     finally:
         db.close()
 

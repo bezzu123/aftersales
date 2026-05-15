@@ -5,9 +5,18 @@ from sqlalchemy.orm import Mapped, mapped_column, relationship
 from app.database import Base
 
 TICKET_STATUSES = (
-    "draft", "pending_gr", "gr_created", "sent_to_vendor",
-    "vendor_accepted", "vendor_rejected", "in_repair", "repaired",
-    "pending_dc", "dc_created", "ready_pickup", "completed", "cancelled",
+    "waiting_repair",   # In-Store: tech is repairing
+    "pending_gr",       # Vendor-BDC: waiting GR to ship out
+    "pending_bdc",      # Vendor-BDC: GR shipped, waiting BDC receipt
+    "received_bdc",     # Vendor-BDC: BDC received, will send to vendor
+    "sent_vendor",      # Vendor flows: with vendor for repair
+    "repaired_pickup",  # All flows: repaired, waiting customer pickup
+    "re_repair",        # All flows: returned for additional repair
+    "pending_cancel",   # Pending DSM cancellation approval
+    "pending_donate",   # Pending DSM donation approval
+    "completed",        # Customer picked up
+    "cancelled",        # Cancelled
+    "donated",          # Donated
 )
 
 
@@ -31,7 +40,10 @@ class Ticket(Base):
     serial_no: Mapped[str | None] = mapped_column(String(100))
     repair_detail: Mapped[str | None] = mapped_column(Text)
     repair_cost: Mapped[float | None] = mapped_column(Numeric(12, 2))
-    repair_channel: Mapped[str | None] = mapped_column(SAEnum("in-store", "send-out", name="repair_channel_enum"))
+    repair_cost_tbd: Mapped[bool] = mapped_column(Boolean, default=False)
+    repair_channel: Mapped[str | None] = mapped_column(
+        SAEnum("in-store", "vendor-store", "vendor-bdc", name="repair_channel_enum")
+    )
     image_url: Mapped[str | None] = mapped_column(String(500))
 
     # Customer
@@ -48,7 +60,7 @@ class Ticket(Base):
 
     # Status & costs
     status: Mapped[str] = mapped_column(
-        SAEnum(*TICKET_STATUSES, name="ticket_status_enum"), nullable=False, default="draft"
+        SAEnum(*TICKET_STATUSES, name="ticket_status_enum"), nullable=False, default="waiting_repair"
     )
     cost_type: Mapped[str | None] = mapped_column(SAEnum("warranty", "chargeable", "goodwill", name="cost_type_enum"))
     cost_desc: Mapped[str | None] = mapped_column(Text)

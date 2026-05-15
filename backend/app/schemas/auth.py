@@ -17,7 +17,6 @@ class UserOut(BaseModel):
     full_name: str | None
     email: str | None
     role: str
-    vendor_id: str | None
     branch_code: str | None
     is_active: bool
 

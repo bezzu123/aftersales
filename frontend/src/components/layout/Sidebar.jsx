@@ -2,15 +2,22 @@ import { NavLink } from "react-router-dom";
 import { useAuth } from "../../contexts/AuthContext";
 import { can } from "../../utils/roleUtils";
 
+const ROLE_LABELS = {
+  pc:    "Product Consultant",
+  bdc:   "BDC Staff",
+  gr:    "GR Staff",
+  dsm:   "District Manager",
+  admin: "Administrator",
+};
+
 const NAV = [
-  { to: "/", label: "Dashboard", icon: "▦", roles: ["dsm", "admin"] },
-  { to: "/tickets", label: "Tickets", icon: "🗒", roles: ["store_staff", "dsm", "admin"] },
-  { to: "/gr", label: "Goods Return", icon: "↩", roles: ["store_staff", "dsm", "admin"] },
-  { to: "/dc", label: "Damage Control", icon: "🔍", roles: ["dsm", "admin"] },
-  { to: "/vendor/tickets", label: "My Tickets", icon: "🔧", roles: ["vendor"] },
-  { to: "/reports", label: "Reports", icon: "📊", roles: ["dsm", "admin"] },
-  { to: "/admin/users", label: "Users", icon: "👥", roles: ["admin"] },
-  { to: "/admin/vendors", label: "Vendors", icon: "🏭", roles: ["admin"] },
+  { to: "/",              label: "Dashboard",      icon: "▦",  roles: ["dsm", "admin"] },
+  { to: "/tickets",       label: "Tickets",         icon: "🗒", roles: ["pc", "bdc", "gr", "dsm", "admin"] },
+  { to: "/gr",            label: "Goods Return",    icon: "↩",  roles: ["gr", "bdc", "dsm", "admin"] },
+  { to: "/dc",            label: "Damage Control",  icon: "🔍", roles: ["bdc", "dsm", "admin"] },
+  { to: "/reports",       label: "Reports",         icon: "📊", roles: ["dsm", "admin"] },
+  { to: "/admin/users",   label: "Users",           icon: "👥", roles: ["admin"] },
+  { to: "/admin/vendors", label: "Vendors",         icon: "🏭", roles: ["admin"] },
 ];
 
 export default function Sidebar({ onClose }) {
@@ -55,10 +62,10 @@ export default function Sidebar({ onClose }) {
           </div>
           <div className="overflow-hidden">
             <p className="text-sm font-medium text-gray-900 truncate">{user?.full_name || user?.username}</p>
-            <p className="text-xs text-gray-400 capitalize">{user?.role?.replace("_", " ")}</p>
+            <p className="text-xs text-gray-400">{ROLE_LABELS[user?.role] || user?.role}</p>
           </div>
         </div>
-        <button onClick={logout} className="w-full btn-ghost text-sm text-left py-2">Sign out</button>
+        <button onClick={logout} className="w-full btn-ghost text-sm text-left py-2">ออกจากระบบ · Sign out</button>
       </div>
     </div>
   );

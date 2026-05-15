@@ -34,7 +34,7 @@ def list_dc(
 def create_dc(
     body: DCCreate,
     db: Session = Depends(get_db),
-    current_user: User = Depends(require_roles("store_staff", "admin")),
+    current_user: User = Depends(require_roles("bdc", "dsm", "admin")),
 ):
     dc = DamageControl(
         dc_number=generate_dc_number(db),
@@ -45,7 +45,7 @@ def create_dc(
     db.add(dc)
     ticket = db.query(Ticket).filter(Ticket.id == body.ticket_id).first()
     if ticket:
-        ticket.status = "dc_created"
+        ticket.status = "pending_bdc"
         ticket.updated_by = current_user.id
     db.commit()
     db.refresh(dc)
@@ -53,7 +53,7 @@ def create_dc(
 
 
 @router.get("/{dc_id}", response_model=DCOut)
-def get_dc(dc_id: str, db: Session = Depends(get_db), current_user: User = Depends(require_roles("dsm", "admin", "store_staff"))):
+def get_dc(dc_id: str, db: Session = Depends(get_db), current_user: User = Depends(require_roles("dsm", "bdc", "admin"))):
     dc = db.query(DamageControl).filter(DamageControl.id == dc_id).first()
     if not dc:
         raise HTTPException(status_code=404, detail="DC not found")

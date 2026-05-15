@@ -1,8 +1,9 @@
 export const ROLE_LABELS = {
-  store_staff: "Store Staff",
-  dsm: "DSM / Manager",
-  vendor: "Vendor",
-  admin: "Admin",
+  pc:    "Product Consultant",
+  bdc:   "BDC Staff",
+  gr:    "GR Staff",
+  dsm:   "District Manager",
+  admin: "Administrator",
 };
 
 export function can(user, ...roles) {

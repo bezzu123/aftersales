@@ -4,7 +4,7 @@ from fastapi.middleware.cors import CORSMiddleware
 from fastapi.staticfiles import StaticFiles
 from app.config import settings
 from app.database import engine, Base
-from app.routers import auth, tickets, gr, dc, vendors, users, vendor_portal, dashboard, reports
+from app.routers import auth, tickets, gr, dc, vendors, users, dashboard, reports
 
 Base.metadata.create_all(bind=engine)
 
@@ -32,7 +32,6 @@ app.include_router(gr.router, prefix=api_prefix)
 app.include_router(dc.router, prefix=api_prefix)
 app.include_router(vendors.router, prefix=api_prefix)
 app.include_router(users.router, prefix=api_prefix)
-app.include_router(vendor_portal.router, prefix=api_prefix)
 app.include_router(dashboard.router, prefix=api_prefix)
 app.include_router(reports.router, prefix=api_prefix)
 

@@ -28,7 +28,6 @@ def create_user(
         full_name=body.full_name,
         email=body.email,
         role=body.role,
-        vendor_id=body.vendor_id,
         branch_code=body.branch_code,
     )
     db.add(user)

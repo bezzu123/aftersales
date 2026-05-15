@@ -6,19 +6,18 @@ from app.dependencies import get_current_user, require_roles
 from app.models.ticket import Ticket, TicketStatusHistory
 from app.models.user import User
 from app.schemas.ticket import TicketCreate, TicketUpdate, TicketOut, TicketListOut, StatusTransition
-from app.services.ticket_service import can_transition, generate_ticket_number
+from app.services.ticket_service import can_transition, generate_ticket_number, initial_status_for_channel
 from app.services.storage_service import save_image
 
 router = APIRouter(prefix="/tickets", tags=["tickets"])
 
 
 def _scope_query(q, user: User):
-    if user.role == "store_staff":
-        q = q.filter(Ticket.branch_id.in_(
-            [b.id for b in (user.branch and [user.branch] or [])]
-        ))
-    elif user.role == "vendor":
-        q = q.filter(Ticket.vendor_id == user.vendor_id)
+    if user.role == "pc" and user.branch_code:
+        from app.models.branch import Branch
+        from app.database import SessionLocal
+        # Scope PC to their own branch
+        pass  # handled inline in list_tickets
     return q
 
 
@@ -36,13 +35,11 @@ def list_tickets(
     current_user: User = Depends(get_current_user),
 ):
     q = db.query(Ticket)
-    if current_user.role == "store_staff" and current_user.branch_code:
+    if current_user.role == "pc" and current_user.branch_code:
         from app.models.branch import Branch
         branch = db.query(Branch).filter(Branch.branch_code == current_user.branch_code).first()
         if branch:
             q = q.filter(Ticket.branch_id == branch.id)
-    elif current_user.role == "vendor":
-        q = q.filter(Ticket.vendor_id == current_user.vendor_id)
     if status:
         q = q.filter(Ticket.status == status)
     if bu:
@@ -63,15 +60,20 @@ def list_tickets(
 def create_ticket(
     body: TicketCreate,
     db: Session = Depends(get_db),
-    current_user: User = Depends(require_roles("store_staff", "admin")),
+    current_user: User = Depends(require_roles("pc", "admin")),
 ):
     ticket_number = generate_ticket_number(db, body.bu)
+    data = body.model_dump()
+    ticket_date = data.pop("ticket_date", None) or date.today()
+    # Auto-set initial status based on repair channel
+    initial_status = initial_status_for_channel(data.get("repair_channel"))
     ticket = Ticket(
         ticket_number=ticket_number,
-        ticket_date=body.ticket_date if hasattr(body, "ticket_date") and body.ticket_date else date.today(),
+        ticket_date=ticket_date,
+        status=initial_status,
         created_by=current_user.id,
         updated_by=current_user.id,
-        **{k: v for k, v in body.model_dump().items() if k != "ticket_date"},
+        **data,
     )
     db.add(ticket)
     db.commit()
@@ -88,8 +90,6 @@ def get_ticket(
     ticket = db.query(Ticket).filter(Ticket.id == ticket_id).first()
     if not ticket:
         raise HTTPException(status_code=404, detail="Ticket not found")
-    if current_user.role == "vendor" and ticket.vendor_id != current_user.vendor_id:
-        raise HTTPException(status_code=403, detail="Access denied")
     return ticket
 
 
@@ -103,7 +103,7 @@ def update_ticket(
     ticket = db.query(Ticket).filter(Ticket.id == ticket_id).first()
     if not ticket:
         raise HTTPException(status_code=404, detail="Ticket not found")
-    if current_user.role not in ("store_staff", "admin"):
+    if current_user.role not in ("pc", "admin"):
         raise HTTPException(status_code=403, detail="Access denied")
     for field, value in body.model_dump(exclude_none=True).items():
         setattr(ticket, field, value)
@@ -153,7 +153,7 @@ async def upload_image(
     ticket_id: str,
     file: UploadFile = File(...),
     db: Session = Depends(get_db),
-    current_user: User = Depends(require_roles("store_staff", "admin")),
+    current_user: User = Depends(require_roles("pc", "admin")),
 ):
     ticket = db.query(Ticket).filter(Ticket.id == ticket_id).first()
     if not ticket:

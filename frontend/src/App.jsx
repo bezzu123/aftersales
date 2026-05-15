@@ -13,7 +13,6 @@ import GRCreate from "./pages/gr/GRCreate";
 import GRDetail from "./pages/gr/GRDetail";
 import DCList from "./pages/dc/DCList";
 import DCCreate from "./pages/dc/DCCreate";
-import VendorPortal from "./pages/vendor/VendorPortal";
 import UserManagement from "./pages/admin/UserManagement";
 import VendorManagement from "./pages/admin/VendorManagement";
 import ReportExport from "./pages/reports/ReportExport";
@@ -26,20 +25,31 @@ export default function App() {
           <Routes>
             <Route path="/login" element={<Login />} />
             <Route element={<ProtectedRoute><AppShell /></ProtectedRoute>}>
+              {/* Dashboard — DSM & Admin only */}
               <Route path="/" element={<ProtectedRoute roles={["dsm", "admin"]}><Dashboard /></ProtectedRoute>} />
+
+              {/* Tickets — all roles can view */}
               <Route path="/tickets" element={<TicketList />} />
-              <Route path="/tickets/create" element={<ProtectedRoute roles={["store_staff","admin"]}><TicketCreate /></ProtectedRoute>} />
+              <Route path="/tickets/create" element={<ProtectedRoute roles={["pc", "admin"]}><TicketCreate /></ProtectedRoute>} />
               <Route path="/tickets/:id" element={<TicketDetail />} />
-              <Route path="/gr" element={<GRList />} />
-              <Route path="/gr/create" element={<ProtectedRoute roles={["store_staff","admin"]}><GRCreate /></ProtectedRoute>} />
-              <Route path="/gr/:id" element={<GRDetail />} />
-              <Route path="/dc" element={<ProtectedRoute roles={["dsm","admin"]}><DCList /></ProtectedRoute>} />
-              <Route path="/dc/create" element={<ProtectedRoute roles={["store_staff","admin"]}><DCCreate /></ProtectedRoute>} />
-              <Route path="/vendor/tickets" element={<ProtectedRoute roles={["vendor"]}><VendorPortal /></ProtectedRoute>} />
-              <Route path="/reports" element={<ProtectedRoute roles={["dsm","admin"]}><ReportExport /></ProtectedRoute>} />
+
+              {/* Goods Return — GR, BDC, DSM, Admin */}
+              <Route path="/gr" element={<ProtectedRoute roles={["gr", "bdc", "dsm", "admin"]}><GRList /></ProtectedRoute>} />
+              <Route path="/gr/create" element={<ProtectedRoute roles={["gr", "admin"]}><GRCreate /></ProtectedRoute>} />
+              <Route path="/gr/:id" element={<ProtectedRoute roles={["gr", "bdc", "dsm", "admin"]}><GRDetail /></ProtectedRoute>} />
+
+              {/* Damage Control — BDC, DSM, Admin */}
+              <Route path="/dc" element={<ProtectedRoute roles={["bdc", "dsm", "admin"]}><DCList /></ProtectedRoute>} />
+              <Route path="/dc/create" element={<ProtectedRoute roles={["bdc", "admin"]}><DCCreate /></ProtectedRoute>} />
+
+              {/* Reports — DSM, Admin */}
+              <Route path="/reports" element={<ProtectedRoute roles={["dsm", "admin"]}><ReportExport /></ProtectedRoute>} />
+
+              {/* Admin */}
               <Route path="/admin/users" element={<ProtectedRoute roles={["admin"]}><UserManagement /></ProtectedRoute>} />
               <Route path="/admin/vendors" element={<ProtectedRoute roles={["admin"]}><VendorManagement /></ProtectedRoute>} />
-              <Route path="*" element={<Navigate to="/" replace />} />
+
+              <Route path="*" element={<Navigate to="/tickets" replace />} />
             </Route>
           </Routes>
         </ToastProvider>

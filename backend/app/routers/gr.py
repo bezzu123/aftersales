@@ -22,8 +22,6 @@ def list_gr(
     current_user: User = Depends(get_current_user),
 ):
     q = db.query(GoodsReturn)
-    if current_user.role == "vendor":
-        q = q.join(Ticket).filter(Ticket.vendor_id == current_user.vendor_id)
     if ticket_id:
         q = q.filter(GoodsReturn.ticket_id == ticket_id)
     if status:
@@ -36,7 +34,7 @@ def list_gr(
 def create_gr(
     body: GRCreate,
     db: Session = Depends(get_db),
-    current_user: User = Depends(require_roles("store_staff", "admin")),
+    current_user: User = Depends(require_roles("gr", "admin")),
 ):
     ticket = db.query(Ticket).filter(Ticket.id == body.ticket_id).first()
     if not ticket:
@@ -48,7 +46,7 @@ def create_gr(
         **body.model_dump(),
     )
     db.add(gr)
-    ticket.status = "gr_created"
+    ticket.status = "pending_bdc"
     ticket.updated_by = current_user.id
     db.commit()
     db.refresh(gr)
@@ -87,7 +85,7 @@ def mark_received(
     gr_id: str,
     body: GRReceived,
     db: Session = Depends(get_db),
-    current_user: User = Depends(require_roles("vendor", "admin")),
+    current_user: User = Depends(require_roles("bdc", "admin")),
 ):
     gr = db.query(GoodsReturn).filter(GoodsReturn.id == gr_id).first()
     if not gr:

@@ -13,6 +13,7 @@ class TicketCreate(BaseModel):
     serial_no: str | None = None
     repair_detail: str | None = None
     repair_cost: float | None = None
+    repair_cost_tbd: bool = False
     repair_channel: str | None = None
     customer_name: str | None = None
     customer_phone: str | None = None
@@ -35,6 +36,7 @@ class TicketUpdate(BaseModel):
     serial_no: str | None = None
     repair_detail: str | None = None
     repair_cost: float | None = None
+    repair_cost_tbd: bool | None = None
     repair_channel: str | None = None
     customer_name: str | None = None
     customer_phone: str | None = None
@@ -70,6 +72,7 @@ class TicketOut(BaseModel):
     serial_no: str | None
     repair_detail: str | None
     repair_cost: float | None
+    repair_cost_tbd: bool
     repair_channel: str | None
     image_url: str | None
     customer_name: str | None
@@ -101,6 +104,7 @@ class TicketListOut(BaseModel):
     ticket_date: date
     bu: str
     status: str
+    repair_channel: str | None
     product_type: str | None
     product_brand: str | None
     customer_name: str | None
