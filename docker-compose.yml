@@ -1,0 +1,21 @@
+services:
+  backend:
+    build: ./backend
+    ports:
+      - "8000:8000"
+    volumes:
+      - ./backend/aftersales.db:/app/aftersales.db
+      - ./backend/uploads:/app/uploads
+    environment:
+      DATABASE_URL: sqlite:///./aftersales.db
+      JWT_SECRET: dev-secret-change-in-production
+      STORAGE_TYPE: local
+      UPLOAD_DIR: ./uploads
+      CORS_ORIGINS: http://localhost:5173,http://localhost:8080
+
+  frontend:
+    build: ./frontend
+    ports:
+      - "8080:8080"
+    depends_on:
+      - backend

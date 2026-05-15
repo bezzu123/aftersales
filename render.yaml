@@ -1,0 +1,24 @@
+services:
+  - type: web
+    name: aftersales-backend
+    runtime: python
+    rootDir: backend
+    buildCommand: pip install -r requirements.txt
+    startCommand: uvicorn app.main:app --host 0.0.0.0 --port $PORT
+    envVars:
+      - key: PYTHONPATH
+        value: .
+      - key: DATABASE_URL
+        value: sqlite:///./aftersales.db
+      - key: JWT_SECRET
+        generateValue: true
+      - key: STORAGE_TYPE
+        value: local
+      - key: UPLOAD_DIR
+        value: ./uploads
+      - key: CORS_ORIGINS
+        value: https://aftersales-central.vercel.app
+    disk:
+      name: aftersales-data
+      mountPath: /opt/render/project/src/backend
+      sizeGB: 1
